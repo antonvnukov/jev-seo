@@ -12,9 +12,9 @@ from jevseo.checks import RULES
 TEMPLATES = Path(__file__).resolve().parent.parent / "templates"
 FONTS = Path(__file__).resolve().parent.parent / "fonts"
 # Bundled fonts (SIL Open Font License) so every machine renders the same design.
-FACES = [("Inter", 400, "Inter-Regular.otf"), ("Inter", 500, "Inter-Medium.otf"), ("Inter", 600, "Inter-SemiBold.otf"),
-         ("Inter", 700, "Inter-Bold.otf"), ("Inter", 800, "Inter-ExtraBold.otf"), ("Inter Display", 700, "InterDisplay-Bold.otf"),
-         ("Inter Display", 800, "InterDisplay-ExtraBold.otf"), ("JetBrains Mono", 500, "JetBrainsMono-Medium.ttf")]
+FACES = [("Space Grotesk", 400, "SpaceGrotesk-Regular.ttf"), ("Space Grotesk", 500, "SpaceGrotesk-Medium.ttf"),
+         ("Space Grotesk", 600, "SpaceGrotesk-SemiBold.ttf"), ("Space Grotesk", 700, "SpaceGrotesk-Bold.ttf"),
+         ("Space Grotesk", 800, "SpaceGrotesk-Bold.ttf"), ("JetBrains Mono", 500, "JetBrainsMono-Medium.ttf")]
 
 
 def font_css() -> str:
@@ -44,7 +44,12 @@ def render_html(vm: dict) -> str:
 def write_pdf(vm: dict, path: Path) -> Path:
     from weasyprint import HTML
 
-    html = render_html(vm)
+    agentic = path.parent / "agentic.json"  # optional: claude-seo agentic_check --json output
+    if agentic.is_file():
+        import json
+        vm = vm | {"agentic": json.loads(agentic.read_text())}
+    from jevseo import brand
+    html = brand.text(render_html(vm))
     path.with_suffix(".html").write_text(html)
     HTML(string=html, base_url=str(path.parent)).write_pdf(path)
     return path

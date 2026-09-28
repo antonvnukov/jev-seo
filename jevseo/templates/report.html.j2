@@ -20,19 +20,19 @@
 {%- endmacro -%}
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><title>SEO audit: {{ domain }}</title><style>{{ css | safe }}</style></head>
+<head><meta charset="utf-8"><title>AI Search Readiness Check: {{ domain }}</title><style>{{ css | safe }}</style></head>
 <body>
 
 <!-- COVER -->
 <section class="cover">
   <div class="cover-band">
-    <div class="kicker">Jev SEO audit</div>
+    <div class="kicker">GoToMoney · AI Search Readiness Check</div>
     <h1 class="domain-string">{{ domain }}</h1>
-    <div class="sub">A live crawl of the site, checked by rules, judged by Jev, scored by code and explained in plain language.</div>
+    <div class="sub">A live crawl of the site: checked by rules, read by a model, scored by code, explained in plain language.</div>
     <svg class="dots" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-      {% for i in range(6) %}{% for j in range(6) %}<circle cx="{{ 10 + i * 20 }}" cy="{{ 10 + j * 20 }}" r="{{ 2 + ((i * 7 + j * 3) % 5) }}" fill="{{ '#d45bb6' if (i + j) % 3 == 0 else '#52514e' }}"/>{% endfor %}{% endfor %}
+      {% for i in range(6) %}{% for j in range(6) %}<circle cx="{{ 10 + i * 20 }}" cy="{{ 10 + j * 20 }}" r="{{ 2 + ((i * 7 + j * 3) % 5) }}" fill="{{ '#00ad74' if (i + j) % 3 == 0 else '#3f3f46' }}"/>{% endfor %}{% endfor %}
     </svg>
-    <div class="meta"><b>{{ date }}</b> · {{ n_fetched }} URLs crawled · {{ n_judgments }} Jev judgments · Jev cost ${{ '%.4f' % (ledger.cost_usd or 0) }}{% if dfs %} · DataForSEO ${{ '%.4f' % dfs.ledger.cost_usd }}{% endif %}</div>
+    <div class="meta"><b>{{ date }}</b> · {{ n_fetched }} URLs crawled · {{ n_judgments }} model judgments · model cost ${{ '%.4f' % (ledger.cost_usd or 0) }}{% if dfs %} · DataForSEO ${{ '%.4f' % dfs.ledger.cost_usd }}{% endif %}</div>
   </div>
   <div class="cover-body">
     <div class="cover-gauge">{{ charts.svg.gauge | safe }}</div>
@@ -53,11 +53,13 @@
   <div class="kicker">Executive summary</div>
   <h2>What matters most on {{ domain }}</h2>
   {% for para in narrative.executive_summary %}<p class="lede">{{ para }}</p>{% endfor %}
+  {% set agent_blocked = agentic.checks | selectattr('priority', 'equalto', 'P0') | selectattr('status', 'equalto', 'fail') | list if agentic else [] %}
+  {% if agent_blocked %}<div class="finding critical avoid"><div class="head"><h4>AI assistants cannot read this site</h4><span class="chip sev-critical">critical</span></div><div class="ev">{% for c in agent_blocked %}{{ c.title }}: failed. {% endfor %}A plain HTTP client, which is how AI fetchers read pages, is refused. Until that changes, no page here can be quoted in an AI answer, whatever its content scores. Details in "AI agent access".</div></div>{% endif %}
   <div class="tiles">
     <div class="tile"><div class="v">{{ scores.overall }}<span class="small muted">/100</span></div><div class="l">overall score, grade {{ scores.grade }}</div></div>
     <div class="tile"><div class="v">{{ p1_count }}</div><div class="l">fix-first actions</div></div>
     <div class="tile"><div class="v">{{ quick_wins | length }}</div><div class="l">quick wins</div></div>
-    <div class="tile jev"><div class="v">{{ decisive_share }}%</div><div class="l">Jev answers decisive</div></div>
+    <div class="tile jev"><div class="v">{{ decisive_share }}%</div><div class="l">judgments decisive</div></div>
   </div>
   <div class="acards">
     {% for a in actions[:3] %}
@@ -89,14 +91,14 @@
 <!-- HOW IT WORKS -->
 <section class="section">
   <div class="kicker">How this audit was made</div>
-  <h2>A source finds, code decides, Jev judges, Claude writes</h2>
-  <p class="lede">Each stage does only what it is good at. Anything a count, a status code or a string match can decide is decided by code. Jev, TypeSafe's System One model, answers narrow typed questions about meaning, with probabilities. Nothing is invented to fill a gap: missing data is shown as missing.</p>
+  <h2>A source finds, code decides, a model judges, code writes</h2>
+  <p class="lede">Each stage does only what it is good at. Anything a count, a status code or a string match can decide is decided by code. A judgment model (Jev, TypeSafe's System One, used here as an experimental layer) answers narrow typed questions about meaning, with probabilities. Nothing is invented to fill a gap: missing data is shown as missing.</p>
   <div class="pipeline">
     <div class="step"><div class="n">1</div><h4>Crawl</h4><div class="what">Live fetch from the homepage: robots.txt, sitemaps, internal links, JavaScript rendering when needed.</div><div class="stat">{{ n_fetched }}<span>URLs · {{ site.requests }} requests</span></div></div>
     <div class="arrow">›</div>
     <div class="step"><div class="n">2</div><h4>Rules</h4><div class="what">{{ rule_count }} deterministic checks tied to Google Search Central and web standards.</div><div class="stat">{{ rule_findings }}<span>rule findings</span></div></div>
     <div class="arrow">›</div>
-    <div class="step jev"><div class="n">3</div><h4>Jev judges</h4><div class="what">Typed Choice, Score and Noul questions, batched per page, with probabilities kept.</div><div class="stat">{{ n_judgments }}<span>judgments · {{ ledger.requests or 0 }} requests · ${{ '%.4f' % (ledger.cost_usd or 0) }}</span></div></div>
+    <div class="step jev"><div class="n">3</div><h4>Model judges</h4><div class="what">Typed Choice, Score and Noul questions, batched per page, with probabilities kept.</div><div class="stat">{{ n_judgments }}<span>judgments · {{ ledger.requests or 0 }} requests · ${{ '%.4f' % (ledger.cost_usd or 0) }}</span></div></div>
     <div class="arrow">›</div>
     <div class="step"><div class="n">4</div><h4>Measure</h4><div class="what">PageSpeed Insights: real-user Core Web Vitals and Lighthouse lab scores.</div><div class="stat">{{ perf_runs | length }}<span>PageSpeed runs</span></div></div>
     <div class="arrow">›</div>
@@ -106,9 +108,9 @@
   <table>
     <tr><th>Stage</th><th>Owns</th><th>Never does</th></tr>
     <tr><td><b>Code</b></td><td>Crawling, status codes, counts, duplicates, schema parsing, formulas, ranking</td><td>Guess at meaning</td></tr>
-    <tr><td><b>Jev</b></td><td>Page type, search intent, importance, helpfulness, specificity, trust, citability, title and meta fit, competing page pairs</td><td>Predict rankings or traffic, invent data, grant permission to act</td></tr>
+    <tr><td><b>Model (Jev)</b></td><td>Page type, search intent, importance, helpfulness, specificity, trust, citability, title and meta fit, competing page pairs</td><td>Predict rankings or traffic, invent data, grant permission to act</td></tr>
     <tr><td><b>PageSpeed</b></td><td>Chrome UX Report field data and Lighthouse lab scores</td><td>Stand in for every page or device</td></tr>
-    <tr><td><b>Claude</b></td><td>The summary and plan, citing action IDs</td><td>Add findings that the evidence does not show</td></tr>
+    <tr><td><b>Summary</b></td><td>The summary and plan, generated from the evidence and citing action IDs</td><td>Add findings that the evidence does not show</td></tr>
   </table>
   <h3>What went through each stage</h3>
   {{ chart('funnel') }}
@@ -140,7 +142,7 @@
 <section class="section">
   <div class="kicker">Priorities</div>
   <h2>What to fix first</h2>
-  <p class="lede">Impact combines severity, how many pages are affected and how important Jev judged those pages to be. Effort is a planning estimate, not a quote.</p>
+  <p class="lede">Impact combines severity, how many pages are affected and how important the model judged those pages to be. Effort is a planning estimate, not a quote.</p>
   {{ chart('impact_effort', 'Each dot is one action; labelled dots are fix-first or high impact. Colour shows priority.') }}
   <table>
     <tr><th>ID</th><th>Action</th><th>Priority</th><th class="num">Impact</th><th>Effort</th><th class="num">Pages</th><th>By</th></tr>
@@ -155,7 +157,7 @@
 <section class="section">
   <div class="kicker">Site structure</div>
   <h2>How the site is linked</h2>
-  <p class="lede">Pages laid out by clicks from the homepage. Bigger dots are pages Jev judged more important; the outer dashed ring holds pages that no crawled page links to.</p>
+  <p class="lede">Pages laid out by clicks from the homepage. Bigger dots are pages the model judged more important; the outer dashed ring holds pages that no crawled page links to.</p>
   {{ chart('site_map') }}
 </section>
 {% endif %}
@@ -179,22 +181,22 @@
   </div>
   <h3>Top ranking keywords</h3>
   <table>
-    <tr><th>Keyword</th><th class="num">Position</th><th class="num">Searches/mo</th><th>Ranking page</th><th class="num">Jev relevance</th></tr>
+    <tr><th>Keyword</th><th class="num">Position</th><th class="num">Searches/mo</th><th>Ranking page</th><th class="num">Relevance</th></tr>
     {% for k in dfs.ranked[:12] %}<tr><td>{{ k.keyword }}</td><td class="num">{{ k.position }}</td><td class="num">{{ '{:,}'.format(k.volume) if k.volume is not none else 'n/a' }}</td><td class="url">{{ k.page }}</td><td class="num">{{ '%.2f' % k.relevance if k.relevance is not none else '–' }}</td></tr>{% endfor %}
   </table>
   {% if dfs.ranked_total and dfs.ranked_total > 12 %}<p class="caption">Showing 12 of {{ dfs.ranked_total }} ranking keywords; all are in the workbook.</p>{% endif %}
 </section>
 <section class="section">
-  <div class="kicker">Search visibility · DataForSEO + Jev</div>
+  <div class="kicker">Search visibility · DataForSEO + model</div>
   <h2>Keywords worth winning</h2>
-  <p class="lede">DataForSEO supplied keyword ideas, suggestions and competitor gaps. Jev kept only those relevant to this business (0.66 or more), dropped searches for other brands, and chose which existing page should own each one, or said a new page is needed.</p>
+  <p class="lede">DataForSEO supplied keyword ideas, suggestions and competitor gaps. The model kept only those relevant to this business (0.66 or more), dropped searches for other brands, and chose which existing page should own each one, or said a new page is needed.</p>
   {{ chart('opportunities') }}
   {% if dfs.opportunities %}
   <table>
-    <tr><th>Keyword</th><th class="num">Searches/mo</th><th class="num">Difficulty</th><th>Intent</th><th class="num">Jev relevance</th><th>Page to own it</th></tr>
+    <tr><th>Keyword</th><th class="num">Searches/mo</th><th class="num">Difficulty</th><th>Intent</th><th class="num">Relevance</th><th>Page to own it</th></tr>
     {% for k in dfs.opportunities[:6] %}<tr><td>{{ k.keyword }}</td><td class="num">{{ '{:,}'.format(k.volume) }}</td><td class="num">{{ k.difficulty if k.difficulty is not none else 'n/a' }}</td><td>{{ k.intent or '–' }}</td><td class="num">{{ '%.2f' % k.relevance if k.relevance is not none else '–' }}</td><td class="url">{{ k.target }}</td></tr>{% endfor %}
   </table>
-  {% else %}<p class="muted">No relevant keyword opportunities passed Jev's relevance filter.</p>{% endif %}
+  {% else %}<p class="muted">No relevant keyword opportunities passed the relevance filter.</p>{% endif %}
   {% if dfs.serps %}
   <div>
   <h3>Live Google results for the top keywords</h3>
@@ -210,9 +212,9 @@
 <!-- JEV -->
 {% if jev_available %}
 <section class="section">
-  <div class="kicker">Jev judgments</div>
-  <h2>How Jev reads the site</h2>
-  <p class="lede">Site-level questions asked over the homepage and the list of page titles. Each card shows Jev's typed answer and the probability it gave each option.</p>
+  <div class="kicker">Page judgments</div>
+  <h2>How a model reads the site</h2>
+  <p class="lede">Site-level questions asked over the homepage and the list of page titles. Each card shows the model's typed answer and the probability it gave each option.</p>
   <div class="jcards">
     {% for c in site_cards %}
     <div class="jcard">
@@ -223,7 +225,7 @@
     </div>
     {% endfor %}
     <div class="jcard stats">
-      <div class="type">This Jev run</div>
+      <div class="type">This run</div>
       <div class="q">Every judgment in this report came from these requests.</div>
       <div class="row"><span>Model</span><b>{{ ledger.model_returned or 'n/a' }}</b></div>
       <div class="row"><span>Requests</span><b>{{ ledger.requests or 0 }}</b></div>
@@ -234,24 +236,24 @@
     </div>
   </div>
   <div class="grid3" style="margin-top:4mm">
-    <div>{{ chart('page_types', 'Page types (Jev Choice)') }}</div>
-    <div>{{ chart('intents', 'Search intent (Jev Choice)') }}</div>
+    <div>{{ chart('page_types', 'Page types (model)') }}</div>
+    <div>{{ chart('intents', 'Search intent (model)') }}</div>
     <div>{{ chart('page_actions', 'Suggested action per page') }}</div>
   </div>
 </section>
 <section class="section">
-  <div class="kicker">Jev judgments</div>
+  <div class="kicker">Page judgments</div>
   <h2>Page quality heatmap</h2>
-  <p class="lede">Every Score and yes or no answer on a 0 to 1 scale, for the pages Jev judged most important. Darker is better. A dash means the question did not apply, for example no meta description to judge.</p>
+  <p class="lede">Every Score and yes or no answer on a 0 to 1 scale, for the pages judged most important. Darker is better. A dash means the question did not apply, for example no meta description to judge.</p>
   {{ chart('jev_heatmap') }}
   <div class="avoid">
-  <h3>How sure was Jev?</h3>
+  <h3>How sure was the model?</h3>
   <p>A Choice or Score answer is decisive at confidence {{ '%.2f' % act }} or above; a yes or no answer is decisive at P(yes) of {{ '%.2f' % yes }} or more, or {{ '%.2f' % no }} or less. Everything else is marked for a human check and flagged on its action.</p>
   {{ chart('jev_confidence') }}
   </div>
   {% if jev_pairs %}
   <h3>Pages that may compete for the same searches</h3>
-  <p>Code shortlisted {{ jev_pairs | length }} pairs with overlapping titles and headings; Jev judged whether a searcher would treat them as substitutes. The most likely competitors are shown; 0.6 or more becomes an action.</p>
+  <p>Code shortlisted {{ jev_pairs | length }} pairs with overlapping titles and headings; the model judged whether a searcher would treat them as substitutes. The most likely competitors are shown; 0.6 or more becomes an action.</p>
   <table>
     <tr><th>Page A</th><th>Page B</th><th class="num">Title overlap</th><th class="num">P(compete)</th></tr>
     {% for p in jev_pairs[:8] %}<tr><td class="url">{{ p.a }}</td><td class="url">{{ p.b }}</td><td class="num">{{ p.title_overlap }}</td><td class="num"><b>{{ '%.2f' % p.judgment.value }}</b></td></tr>{% endfor %}
@@ -262,13 +264,13 @@
 
 {% if 'invest' in charts.svg %}
 <section class="section">
-  <div class="kicker">Jev judgments</div>
+  <div class="kicker">Page judgments</div>
   <h2>Where to invest</h2>
-  <p class="lede">Each page placed by how important Jev judged it to the business and how good its content is (mean of helpfulness, specificity and trust). Pages in the shaded corner matter and are weak: improving them is likely to pay back first.</p>
+  <p class="lede">Each page placed by how important the model judged it to the business and how good its content is (mean of helpfulness, specificity and trust). Pages in the shaded corner matter and are weak: improving them is likely to pay back first.</p>
   {{ chart('invest') }}
   {% if invest_pages %}
   <table>
-    <tr><th>Important but weak</th><th class="num">Importance</th><th class="num">Quality</th><th>Jev suggests</th></tr>
+    <tr><th>Important but weak</th><th class="num">Importance</th><th class="num">Quality</th><th>Suggested</th></tr>
     {% for p in invest_pages %}<tr><td class="url">{{ p.short }}</td><td class="num">{{ '%.2f' % p.importance }}</td><td class="num">{{ '%.2f' % p.quality }}</td><td>{{ (p.action or '–') | replace('_', ' ') }}</td></tr>{% endfor %}
   </table>
   {% else %}<p class="muted">No page is both important (0.5 or more) and weak (below 0.5).</p>{% endif %}
@@ -316,12 +318,41 @@
 </section>
 {% endif %}{% endfor %}
 
+<!-- AGENT ACCESS (claude-seo agentic_check) -->
+{% if agentic %}
+<section class="section">
+  <div class="kicker">AI agent access</div>
+  <h2>Can AI assistants actually read this site?</h2>
+  <p class="lede">A separate check requests the site the way AI fetchers do: a plain HTTP client with no browser. It covers what an assistant needs before it can cite a page: reachability, robots rules per AI agent, llms.txt and machine-readable discovery files.</p>
+  <table>
+    <tr><th>Priority</th><th>Check</th><th>Result</th></tr>
+    {% for c in agentic.checks if c.status in ('fail', 'warn', 'pass') and c.priority in ('P0', 'P1') %}
+    <tr><td>{{ c.priority }}</td><td>{{ c.title }}</td><td><span class="chip {{ 'sev-critical' if c.status == 'fail' else ('sev-medium' if c.status == 'warn' else 'sev-info') }}">{{ c.status }}</span>{% if c.status != 'pass' and c.fix %} {{ c.fix }}{% endif %}</td></tr>
+    {% endfor %}
+  </table>
+  <p class="caption">Checked {{ agentic.checked_at[:10] }} with claude-seo agentic_check (facts verified {{ agentic.facts_checked_on }}).</p>
+</section>
+{% endif %}
+
+<!-- WHAT THIS CHECK CANNOT SEE -->
+<section class="{{ 'avoid cannot-see' if agentic else 'section' }}">
+  <div class="kicker">What this check cannot see</div>
+  <h2>Being readable is not the same as being cited</h2>
+  <p class="lede">This check shows whether search engines and AI assistants can reach, read and quote {{ domain }}. It does not show whether they do. AI answers cite a small set of sites for each buyer question, and in our tracking, which kinds of sites win those citations predicts who gets cited better than anything on the page itself.</p>
+  <ul>
+    <li>Which sites ChatGPT, Gemini, Perplexity and Google AI Overviews cite for your buyers' questions, prompt by prompt.</li>
+    <li>Your share of those citations against named competitors, measured over repeated runs.</li>
+    <li>Which placements (reviews, lists, communities, media) would put you inside those answers.</li>
+  </ul>
+  <p>That is the AI Search audit: a fixed fee of EUR 3,500, one to two weeks, ending with a ranked plan and the first quick wins shipped. Reply to the email this report came with, or write to <a href="mailto:hello@gotomoney.io?subject=AI%20Search%20audit%20%C2%B7%20{{ domain }}">hello@gotomoney.io</a>.</p>
+</section>
+
 <!-- APPENDIX -->
 <section class="section">
   <div class="kicker">Appendix</div>
   <h2>Page inventory</h2>
   <table>
-    <tr><th>Page</th><th class="num">Depth</th><th class="num">Words</th><th class="num">In</th><th>Type (Jev)</th><th>Intent (Jev)</th><th class="num">Import.</th><th>Action (Jev)</th></tr>
+    <tr><th>Page</th><th class="num">Depth</th><th class="num">Words</th><th class="num">In</th><th>Type</th><th>Intent</th><th class="num">Import.</th><th>Action</th></tr>
     {% for p in pages %}<tr><td class="url">{{ p.short }}</td><td class="num">{{ p.depth if p.depth != 99 else '–' }}</td><td class="num">{{ p.words }}</td><td class="num">{{ p.inlinks }}</td><td>{{ (p.page_type or '–') | replace('_', ' ') }}</td><td>{{ p.intent or '–' }}</td><td class="num">{{ '%.2f' % p.importance if p.importance is not none else '–' }}</td><td>{{ {'keep_or_improve': 'keep', 'merge_or_remove': 'merge or remove'}.get(p.action, (p.action or '–') | replace('_', ' ')) }}</td></tr>{% endfor %}
   </table>
 </section>
@@ -329,16 +360,16 @@
   <div class="kicker">Appendix</div>
   <h2>Method, sources and limits</h2>
   <h3>Formulas</h3>
-  <p><b>Area score</b> starts at 100 and subtracts, per finding, a severity amount (critical 25, high 12, medium 6, low 2, info 0) times (0.5 + 0.5 × share of pages affected). Site-wide findings count as full share. Content quality and AI search readiness blend 70% importance-weighted Jev judgments with 30% rules. Performance blends 50% Lighthouse mobile performance with 50% crawl observations.</p>
+  <p><b>Area score</b> starts at 100 and subtracts, per finding, a severity amount (critical 25, high 12, medium 6, low 2, info 0) times (0.5 + 0.5 × share of pages affected). Site-wide findings count as full share. Content quality and AI search readiness blend 70% importance-weighted model judgments with 30% rules. Performance blends 50% Lighthouse mobile performance with 50% crawl observations.</p>
   <p><b>Overall score</b> is the weighted mean of scored areas (weights in the scorecard). Unscored areas are left out, never counted as zero. A blocked site is capped at 20; a site without reliable HTTPS at 60.</p>
-  <p><b>Impact</b> = severity weight (critical 10, high 6, medium 3, low 1) × (0.6 + 0.4 × reach) × (0.6 + 0.8 × highest Jev importance among affected pages), scaled so the largest is 100. <b>Priority:</b> P1 for critical, or high with impact 40 or more; P2 for impact 30 or more or any high; P3 otherwise. <b>Quick win:</b> impact 35 or more with effort of hours.</p>
-  <h3>Jev</h3>
+  <p><b>Impact</b> = severity weight (critical 10, high 6, medium 3, low 1) × (0.6 + 0.4 × reach) × (0.6 + 0.8 × highest judged importance among affected pages), scaled so the largest is 100. <b>Priority:</b> P1 for critical, or high with impact 40 or more; P2 for impact 30 or more or any high; P3 otherwise. <b>Quick win:</b> impact 35 or more with effort of hours.</p>
+  <h3>Judgment model (Jev, experimental)</h3>
   <p>Model requested {{ ledger.model_requested or 'n/a' }}, returned {{ ledger.model_returned or 'n/a' }}. {{ ledger.requests or 0 }} requests, {{ ledger.input_tokens or 0 }} input tokens, {{ ledger.failed or 0 }} failed, {{ ledger.skipped_budget or 0 }} skipped by the budget cap. Cost ${{ '%.4f' % (ledger.cost_usd or 0) }} at ${{ ledger.usd_per_mtok or 0.042 }} per million input tokens (output is free). Page text sent to Jev is capped at 6,000 characters. Jev answers are model judgments, not measurements; decisive does not mean correct.</p>
   {% if dfs %}<h3>DataForSEO</h3>
   <p>{{ dfs.ledger.requests }} requests, ${{ '%.4f' % dfs.ledger.cost_usd }} as reported per call by DataForSEO, {{ dfs.ledger.failed }} failed, {{ dfs.ledger.skipped_budget }} skipped by the budget cap{% if dfs.reused_from %}; data reused from the collection at {{ dfs.reused_from }}{% endif %}. Location {{ dfs.location_code }}, language {{ dfs.language_code }}. Search volumes, difficulty and traffic (ETV) are DataForSEO estimates; positions are organic ranks at collection time.</p>{% endif %}
   <h3>Limits</h3>
   <ul>
-    {% if not_judged %}<li>{{ not_judged | length }} pages were not judged by Jev (request failed or budget cap reached); they carry no Jev findings, which is not the same as passing.</li>{% endif %}
+    {% if not_judged %}<li>{{ not_judged | length }} pages were not judged by the model (request failed or budget cap reached); they carry no model findings, which is not the same as passing.</li>{% endif %}
     <li>The crawl covered {{ n_fetched }} URLs{% if site.limits.hit_page_cap %}, stopping at the page cap, so site-wide counts describe a sample{% endif %}. Orphan and depth findings only see links on crawled pages.</li>
     {% if dfs %}<li>Rankings, keywords and backlinks come from DataForSEO's databases, not from Search Console or analytics. Nothing here measures actual visits or revenue.</li>{% else %}<li>No Search Console, analytics, backlink or keyword data was used (run with --full for DataForSEO). Nothing here measures rankings, traffic or revenue.</li>{% endif %}
     <li>PageSpeed lab scores vary between runs. Field data exists only for sites with enough Chrome traffic.</li>
@@ -346,7 +377,7 @@
   </ul>
   <h3>Sources</h3>
   <div class="sources">{% for src in sources %}<a href="{{ src }}">{{ src | replace('https://', '') }}</a>{% endfor %}</div>
-  <p class="caption">Generated {{ generated }} by jev-seo {{ d.tool.version }}. Crawl started {{ d.run.started_at }}.</p>
+  <p class="caption">Generated {{ generated }} by GoToMoney (gotomoney.io) on jev-seo {{ d.tool.version }} (MIT, AgriciDaniel/jev-seo). Crawl started {{ d.run.started_at }}.</p>
 </section>
 </body>
 </html>

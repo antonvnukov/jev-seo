@@ -20,23 +20,23 @@ from matplotlib.colors import LinearSegmentedColormap  # noqa: E402
 from matplotlib.patches import FancyBboxPatch, Wedge  # noqa: E402
 from matplotlib.ticker import FuncFormatter, MaxNLocator  # noqa: E402
 
-SURFACE = "#fcfcfb"
-PANEL = "#f4f3ef"
-INK = "#0b0b0b"
-INK2 = "#52514e"
-MUTED = "#898781"
-GRID = "#e1e0d9"
-MAGENTA = "#d45bb6"
-CATEGORICAL = ["#d45bb6", "#1baf7a", "#4a3aa7", "#eb6834", "#2a78d6", "#eda100"]
-OTHER = "#c3c2b7"
-STATUS = {"critical": "#d03b3b", "high": "#ec835a", "medium": "#fab219", "low": "#8fb3d9", "good": "#0ca30c", "info": "#c3c2b7"}
-RAMP = ["#fbeaf5", "#f2c4e4", "#e691cf", "#d45bb6", "#a83a8c", "#6e2059"]
+SURFACE = "#fafafa"
+PANEL = "#f4f4f5"
+INK = "#18181b"
+INK2 = "#3f3f46"
+MUTED = "#71717a"
+GRID = "#e4e4e7"
+MAGENTA = "#00ad74"
+CATEGORICAL = ["#00ad74", "#1baf7a", "#4a3aa7", "#eb6834", "#2a78d6", "#eda100"]
+OTHER = "#a1a1aa"
+STATUS = {"critical": "#d03b3b", "high": "#ec835a", "medium": "#fab219", "low": "#8fb3d9", "good": "#0ca30c", "info": "#a1a1aa"}
+RAMP = ["#e7f6ef", "#b6e6d0", "#6fcba5", "#00ad74", "#047857", "#064e3b"]
 CMAP = LinearSegmentedColormap.from_list("jev", RAMP)
 PRIORITY = {"P1": RAMP[5], "P2": RAMP[3], "P3": RAMP[1]}
 
-for _f in (Path(__file__).resolve().parent.parent / "fonts").glob("Inter-*.otf"):
+for _f in (Path(__file__).resolve().parent.parent / "fonts").glob("SpaceGrotesk-*.ttf"):
     font_manager.fontManager.addfont(str(_f))  # bundled, so charts match the PDF on every machine
-FONT = "Inter" if any("Inter" == f.name for f in font_manager.fontManager.ttflist) else "DejaVu Sans"
+FONT = "Space Grotesk" if any("Space Grotesk" == f.name for f in font_manager.fontManager.ttflist) else "DejaVu Sans"
 plt.rcParams.update({
     "font.family": FONT,
     "font.size": 9,

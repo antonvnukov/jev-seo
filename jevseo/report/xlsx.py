@@ -16,16 +16,16 @@ from jevseo.report import JEV_COLUMNS
 
 JEV_LABELS = {"helpfulness": "Helpfulness", "specificity": "Specificity", "trust": "Trust", "citable": "Citability", "answer_first": "Answer first",
               "title_fit": "Title fit", "meta_fit": "Meta fit", "clear_next_step": "Next step"}
-INK = "0B0B0B"
-JEV = "D45BB6"
-SOFT = "FBEAF5"
-PANEL = "F4F3EF"
-LINE = "E1E0D9"
+INK = "18181B"
+JEV = "00AD74"
+SOFT = "E7F6EF"
+PANEL = "F4F4F5"
+LINE = "E4E4E7"
 INPUT = "FFF7D6"
 SEV_FILL = {"critical": "F8DCDC", "high": "FBE3D8", "medium": "FDF0D0", "low": "E3ECF6"}
 STATUSES = ["to_do", "in_progress", "done", "deferred", "not_applicable"]
-HEAD = Font(name="Inter", bold=True, color="FFFFFF", size=10)
-BODY = Font(name="Inter", size=10)
+HEAD = Font(name="Space Grotesk", bold=True, color="FFFFFF", size=10)
+BODY = Font(name="Space Grotesk", size=10)
 WRAP = Alignment(wrap_text=True, vertical="top")
 THIN = Border(bottom=Side(style="thin", color=LINE))
 
@@ -61,7 +61,7 @@ def table(ws, headers: list[str], rows: list[list], widths: list[int], start_row
 def link(cell, url: str) -> None:
     if url and url.startswith("http"):
         cell.hyperlink = url
-        cell.font = Font(name="Inter", size=10, color="A83A8C", underline="single")
+        cell.font = Font(name="Space Grotesk", size=10, color="047857", underline="single")
 
 
 def write_xlsx(vm: dict, path: Path) -> Path:
@@ -74,9 +74,9 @@ def write_xlsx(vm: dict, path: Path) -> Path:
     ws.title = "Summary"
     ws.sheet_view.showGridLines = False
     ws["A1"] = f"Jev SEO audit: {vm['domain']}"
-    ws["A1"].font = Font(name="Inter Display", bold=True, size=20)
+    ws["A1"].font = Font(name="Space Grotesk", bold=True, size=20)
     ws["A2"] = f"Audited {d['run']['finished_at']} · {vm['n_fetched']} URLs crawled · {vm['n_pages']} HTML pages · Jev {vm['ledger'].get('model_returned') or 'not used'}"
-    ws["A2"].font = Font(name="Inter", size=10, color="52514E")
+    ws["A2"].font = Font(name="Space Grotesk", size=10, color="3F3F46")
     ws["A4"], ws["B4"] = "Overall score", s["overall"]
     ws["A5"], ws["B5"] = "Grade", s["grade"] + (" (partial audit)" if s.get("partial") else "")
     ws["A6"], ws["B6"] = "Jev cost (USD)", vm["ledger"].get("cost_usd") or 0
@@ -85,8 +85,8 @@ def write_xlsx(vm: dict, path: Path) -> Path:
     if vm.get("dfs"):
         ws["B7"].number_format = "$0.0000"
     for r in (4, 5, 6, 7):
-        ws[f"A{r}"].font = Font(name="Inter", bold=True)
-        ws[f"B{r}"].font = Font(name="Inter Display", bold=True, size=14, color="A83A8C")
+        ws[f"A{r}"].font = Font(name="Space Grotesk", bold=True)
+        ws[f"B{r}"].font = Font(name="Space Grotesk", bold=True, size=14, color="047857")
     ws["A9"] = "Area"
     ws["B9"] = "Score"
     ws["C9"] = "Weight"
@@ -101,7 +101,7 @@ def write_xlsx(vm: dict, path: Path) -> Path:
         ws.cell(r, 3, s["weights"][cat]).font = BODY
         ws.cell(r, 4, s["notes"][cat]).font = BODY
         r += 1
-    cf(ws, f"B10:B{r - 1}", ColorScaleRule(start_type="num", start_value=0, start_color="FBEAF5", end_type="num", end_value=100, end_color="A83A8C"))
+    cf(ws, f"B10:B{r - 1}", ColorScaleRule(start_type="num", start_value=0, start_color="E7F6EF", end_type="num", end_value=100, end_color="047857"))
     chart = BarChart()
     chart.type = "bar"
     chart.title = "Score by area"
@@ -116,7 +116,7 @@ def write_xlsx(vm: dict, path: Path) -> Path:
     ws.add_chart(chart, "F3")
 
     r += 1
-    ws.cell(r, 1, "Live status counts (from the Actions sheet)").font = Font(name="Inter", bold=True, size=12)
+    ws.cell(r, 1, "Live status counts (from the Actions sheet)").font = Font(name="Space Grotesk", bold=True, size=12)
     r += 1
     status_start = r
     for st in STATUSES:
@@ -124,15 +124,15 @@ def write_xlsx(vm: dict, path: Path) -> Path:
         ws.cell(r, 2, f'=COUNTIF(Actions!$E:$E,"{st}")').font = BODY
         r += 1
     r += 1
-    ws.cell(r, 1, "Open actions by priority").font = Font(name="Inter", bold=True, size=12)
+    ws.cell(r, 1, "Open actions by priority").font = Font(name="Space Grotesk", bold=True, size=12)
     r += 1
 
     for p in ("P1", "P2", "P3"):
         ws.cell(r, 1, p).font = BODY
         ws.cell(r, 2, f'=COUNTIFS(Actions!$C:$C,"{p}",Actions!$E:$E,"<>done",Actions!$E:$E,"<>not_applicable")').font = BODY
         r += 1
-    ws.cell(r, 1, "Total actions").font = Font(name="Inter", bold=True)
-    ws.cell(r, 2, f"=COUNTA(Actions!$A:$A)-1").font = Font(name="Inter", bold=True)
+    ws.cell(r, 1, "Total actions").font = Font(name="Space Grotesk", bold=True)
+    ws.cell(r, 2, f"=COUNTA(Actions!$A:$A)-1").font = Font(name="Space Grotesk", bold=True)
     donut = DoughnutChart()
     donut.title = "Action status"
     donut.add_data(Reference(ws, min_col=2, min_row=status_start, max_row=status_start + len(STATUSES) - 1))
@@ -175,7 +175,7 @@ def write_xlsx(vm: dict, path: Path) -> Path:
         wa[f"G{i}"].number_format = "yyyy-mm-dd"
         link(wa[f"S{i}"], wa[f"S{i}"].value)
     cf(wa, f"E2:E{n}", CellIsRule(operator="equal", formula=['"done"'], fill=PatternFill("solid", fgColor="DFF3DF")))
-    cf(wa, f"I2:I{n}", ColorScaleRule(start_type="num", start_value=0, start_color="FFFFFF", end_type="num", end_value=100, end_color="E691CF"))
+    cf(wa, f"I2:I{n}", ColorScaleRule(start_type="num", start_value=0, start_color="FFFFFF", end_type="num", end_value=100, end_color="6FCBA5"))
 
     # ---------------- Pages
     wp = wb.create_sheet("Pages")
@@ -202,7 +202,7 @@ def write_xlsx(vm: dict, path: Path) -> Path:
     first_jev = get_column_letter(len(cols) - len(JEV_COLUMNS) + 1)
     last = get_column_letter(len(cols))
     if prow:
-        cf(wp, f"{first_jev}2:{last}{len(prow) + 1}", ColorScaleRule(start_type="num", start_value=0, start_color="FBEAF5", end_type="num", end_value=1, end_color="A83A8C"))
+        cf(wp, f"{first_jev}2:{last}{len(prow) + 1}", ColorScaleRule(start_type="num", start_value=0, start_color="E7F6EF", end_type="num", end_value=1, end_color="047857"))
 
     # ---------------- Jev judgments (raw, with probabilities)
     wj = wb.create_sheet("Jev judgments")
@@ -302,7 +302,7 @@ def write_xlsx(vm: dict, path: Path) -> Path:
         wm2 = wb.create_sheet("AI mentions")
         rows = [[i.get("platform"), i.get("model"), i.get("question"), i.get("ai_search_volume"), ", ".join(i.get("sources") or [])] for i in m.get("items") or []]
         table(wm2, ["Platform", "Model", "Question", "AI search volume", "Sources cited"], rows, [14, 20, 60, 14, 50])
-        wm2.cell(len(rows) + 3, 1, f"Total mentions reported by DataForSEO LLM Mentions: {m.get('total')}. Showing a sample of {len(rows)}.").font = Font(name="Inter", italic=True, size=9)
+        wm2.cell(len(rows) + 3, 1, f"Total mentions reported by DataForSEO LLM Mentions: {m.get('total')}. Showing a sample of {len(rows)}.").font = Font(name="Space Grotesk", italic=True, size=9)
 
     # ---------------- Charts (images from the report)
     wc = wb.create_sheet("Charts")
@@ -332,8 +332,16 @@ def write_xlsx(vm: dict, path: Path) -> Path:
     table(wm, ["Topic", "Detail"], notes, [20, 120])
 
     for sheet in wb.worksheets:
-        sheet.sheet_properties.tabColor = JEV if sheet.title in ("Summary", "Actions", "Jev judgments") else "C3C2B7"
+        sheet.sheet_properties.tabColor = JEV if sheet.title in ("Summary", "Actions", "Jev judgments") else "A1A1AA"
     # Formula cells carry no stored values; ask the spreadsheet app to calculate on open.
     wb.calculation.fullCalcOnLoad = True
+    from jevseo import brand
+    for sheet in wb.worksheets:
+        if sheet.title == "Jev judgments":
+            sheet.title = "Model judgments"
+        for row in sheet.iter_rows():
+            for cell in row:
+                if isinstance(cell.value, str) and not cell.value.startswith("="):
+                    cell.value = brand.text(cell.value)
     wb.save(path)
     return path

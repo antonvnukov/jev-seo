@@ -464,7 +464,8 @@ class RenderTests(unittest.TestCase):
 
     def test_narrative_used(self):
         tmp, out = self.build({"executive_summary": ["Custom verdict about JEV-001."], "strengths": ["s"], "risks": ["r"], "plan": [{"horizon": "This week", "items": ["JEV-001"]}]})
-        self.assertIn("Custom verdict about JEV-001.", out["md"].read_text())
+        # gotomoney branch: rendered action ids use brand.ACTION_PREFIX (RC-###)
+        self.assertIn("Custom verdict about RC-001.", out["md"].read_text())
 
 
 if __name__ == "__main__":
