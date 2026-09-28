@@ -260,7 +260,9 @@ def doctor(_args) -> None:
             report[mod] = "ok"
         except ImportError as err:
             report[mod] = f"missing ({err.name})"
-    report["TYPESAFE_API_KEY"] = "present" if secret("TYPESAFE_API_KEY") else "missing: Jev judgments will be skipped"
+    report["JEV_KEY"] = ("TYPESAFE_API_KEY present" if secret("TYPESAFE_API_KEY")
+                         else "OPENROUTER_API_KEY present (OpenRouter route)" if secret("OPENROUTER_API_KEY")
+                         else "missing: Jev judgments will be skipped")
     report["PAGESPEED_API_KEY"] = "present" if secret("PAGESPEED_API_KEY") else "missing: PageSpeed runs unkeyed and may be rate limited"
     report["DATAFORSEO"] = "present (needed only for --full)" if secret("DATAFORSEO_USERNAME") and secret("DATAFORSEO_PASSWORD") else "missing: --full mode unavailable"
     print(json.dumps(report, indent=1))

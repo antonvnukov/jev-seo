@@ -21,6 +21,20 @@ from jevseo.env import secret
 API = "https://api.typesafe.ai/v1/systemone"
 MODELS_API = "https://api.typesafe.ai/v1/models"
 MODEL = "jev-latest"
+# Same request/response contract, served by OpenRouter (alpha decisions route).
+OPENROUTER_API = "https://openrouter.ai/api/alpha/decisions"
+OPENROUTER_MODEL = "typesafe/jev-1.13"
+
+
+def provider() -> tuple[str, str, str | None]:
+    """(endpoint, model, key): TypeSafe direct when TYPESAFE_API_KEY is set, else OpenRouter."""
+    key = secret("TYPESAFE_API_KEY")
+    if key:
+        return API, MODEL, key
+    key = secret("OPENROUTER_API_KEY")
+    if key:
+        return OPENROUTER_API, OPENROUTER_MODEL, key
+    return API, MODEL, None
 USD_PER_MTOK = 0.042  # docs.typesafe.ai/models, retrieved 2026-09-20; re-check with the Jev brain staleness rule
 PAGE_TEXT_CHARS = 6000
 ACT = 0.80  # Choice and Score confidence at or above this is decisive
@@ -329,11 +343,11 @@ def keyword_batches(keywords: list[dict], pages: list[dict], site_ctx: dict, siz
 # ---------------------------------------------------------------- client
 class Jev:
     def __init__(self, budget_usd: float = 0.25, log=print):
-        self.key = secret("TYPESAFE_API_KEY")
+        self.api, self.model, self.key = provider()
         self.budget = budget_usd
         self.log = log
         self.lock = threading.Lock()
-        self.ledger = {"model_requested": MODEL, "model_returned": None, "requests": 0, "failed": 0, "input_tokens": 0, "output_tokens": 0, "est_reserved_tokens": 0, "skipped_budget": 0, "errors": []}
+        self.ledger = {"model_requested": self.model, "model_returned": None, "requests": 0, "failed": 0, "input_tokens": 0, "output_tokens": 0, "est_reserved_tokens": 0, "skipped_budget": 0, "errors": []}
 
     @property
     def available(self) -> bool:
@@ -343,7 +357,7 @@ class Jev:
         return round(self.ledger["input_tokens"] / 1e6 * USD_PER_MTOK, 6)
 
     def ask(self, state: dict, questions: dict) -> dict | None:
-        body = json.dumps({"state": state, "model": MODEL, "questions": questions})
+        body = json.dumps({"state": state, "model": self.model, "questions": questions})
         est = len(body) // 3  # conservative token estimate for the budget reservation
         with self.lock:
             spent = (self.ledger["input_tokens"] + self.ledger["est_reserved_tokens"]) / 1e6 * USD_PER_MTOK
@@ -354,7 +368,7 @@ class Jev:
         try:
             for attempt in range(5):
                 try:
-                    r = requests.post(API, data=body, headers={"Authorization": f"Bearer {self.key}", "Content-Type": "application/json"}, timeout=90)
+                    r = requests.post(self.api, data=body, headers={"Authorization": f"Bearer {self.key}", "Content-Type": "application/json"}, timeout=90)
                 except requests.RequestException as err:
                     if attempt < 4:
                         time.sleep(2**attempt)
@@ -431,7 +445,7 @@ def judge(crawl: dict, pages: list[dict], budget_usd: float, log=print, dfs: dic
     jev = Jev(budget_usd, log)
     out = {"available": jev.available, "site": None, "pages": {}, "pairs": [], "ledger": jev.ledger, "questions": {}}
     if not jev.available:
-        log("TYPESAFE_API_KEY not found: Jev judgments skipped; semantic sections will be marked not assessed.")
+        log("Neither TYPESAFE_API_KEY nor OPENROUTER_API_KEY found: Jev judgments skipped; semantic sections will be marked not assessed.")
         return out
     home = next((p for p in pages if p["url"] == crawl["final_url"]), pages[0] if pages else None)
     if home is None:
