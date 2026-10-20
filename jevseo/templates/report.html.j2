@@ -32,7 +32,7 @@
     <svg class="dots" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
       {% for i in range(6) %}{% for j in range(6) %}<circle cx="{{ 10 + i * 20 }}" cy="{{ 10 + j * 20 }}" r="{{ 2 + ((i * 7 + j * 3) % 5) }}" fill="{{ '#00ad74' if (i + j) % 3 == 0 else '#3f3f46' }}"/>{% endfor %}{% endfor %}
     </svg>
-    <div class="meta"><b>{{ date }}</b> · {{ n_fetched }} URLs crawled · {{ n_judgments }} model judgments · model cost ${{ '%.4f' % (ledger.cost_usd or 0) }}{% if dfs %} · DataForSEO ${{ '%.4f' % dfs.ledger.cost_usd }}{% endif %}</div>
+    <div class="meta"><b>{{ date }}</b> · {{ n_fetched }} URLs crawled · {{ n_judgments }} model judgments</div>
   </div>
   <div class="cover-body">
     <div class="cover-gauge">{{ charts.svg.gauge | safe }}</div>
@@ -98,7 +98,7 @@
     <div class="arrow">›</div>
     <div class="step"><div class="n">2</div><h4>Rules</h4><div class="what">{{ rule_count }} deterministic checks tied to Google Search Central and web standards.</div><div class="stat">{{ rule_findings }}<span>rule findings</span></div></div>
     <div class="arrow">›</div>
-    <div class="step jev"><div class="n">3</div><h4>Model judges</h4><div class="what">Typed Choice, Score and Noul questions, batched per page, with probabilities kept.</div><div class="stat">{{ n_judgments }}<span>judgments · {{ ledger.requests or 0 }} requests · ${{ '%.4f' % (ledger.cost_usd or 0) }}</span></div></div>
+    <div class="step jev"><div class="n">3</div><h4>Model judges</h4><div class="what">Typed Choice, Score and Noul questions, batched per page, with probabilities kept.</div><div class="stat">{{ n_judgments }}<span>judgments · {{ ledger.requests or 0 }} requests</span></div></div>
     <div class="arrow">›</div>
     <div class="step"><div class="n">4</div><h4>Measure</h4><div class="what">PageSpeed Insights: real-user Core Web Vitals and Lighthouse lab scores.</div><div class="stat">{{ perf_runs | length }}<span>PageSpeed runs</span></div></div>
     <div class="arrow">›</div>
@@ -232,7 +232,6 @@
       <div class="row"><span>Judgments</span><b>{{ n_judgments }}</b></div>
       <div class="row"><span>Input tokens</span><b>{{ '{:,}'.format(ledger.input_tokens or 0) }}</b></div>
       <div class="row"><span>Decisive answers</span><b>{{ decisive_share }}%</b></div>
-      <div class="row"><span>Cost</span><b>${{ '%.4f' % (ledger.cost_usd or 0) }}</b></div>
     </div>
   </div>
   <div class="grid3" style="margin-top:4mm">
@@ -364,9 +363,9 @@
   <p><b>Overall score</b> is the weighted mean of scored areas (weights in the scorecard). Unscored areas are left out, never counted as zero. A blocked site is capped at 20; a site without reliable HTTPS at 60.</p>
   <p><b>Impact</b> = severity weight (critical 10, high 6, medium 3, low 1) × (0.6 + 0.4 × reach) × (0.6 + 0.8 × highest judged importance among affected pages), scaled so the largest is 100. <b>Priority:</b> P1 for critical, or high with impact 40 or more; P2 for impact 30 or more or any high; P3 otherwise. <b>Quick win:</b> impact 35 or more with effort of hours.</p>
   <h3>Judgment model (Jev, experimental)</h3>
-  <p>Model requested {{ ledger.model_requested or 'n/a' }}, returned {{ ledger.model_returned or 'n/a' }}. {{ ledger.requests or 0 }} requests, {{ ledger.input_tokens or 0 }} input tokens, {{ ledger.failed or 0 }} failed, {{ ledger.skipped_budget or 0 }} skipped by the budget cap. Cost ${{ '%.4f' % (ledger.cost_usd or 0) }} at ${{ ledger.usd_per_mtok or 0.042 }} per million input tokens (output is free). Page text sent to Jev is capped at 6,000 characters. Jev answers are model judgments, not measurements; decisive does not mean correct.</p>
+  <p>Model requested {{ ledger.model_requested or 'n/a' }}, returned {{ ledger.model_returned or 'n/a' }}. {{ ledger.requests or 0 }} requests, {{ ledger.input_tokens or 0 }} input tokens, {{ ledger.failed or 0 }} failed, {{ ledger.skipped_budget or 0 }} skipped by the budget cap. Page text sent to Jev is capped at 6,000 characters. Jev answers are model judgments, not measurements; decisive does not mean correct.</p>
   {% if dfs %}<h3>DataForSEO</h3>
-  <p>{{ dfs.ledger.requests }} requests, ${{ '%.4f' % dfs.ledger.cost_usd }} as reported per call by DataForSEO, {{ dfs.ledger.failed }} failed, {{ dfs.ledger.skipped_budget }} skipped by the budget cap{% if dfs.reused_from %}; data reused from the collection at {{ dfs.reused_from }}{% endif %}. Location {{ dfs.location_code }}, language {{ dfs.language_code }}. Search volumes, difficulty and traffic (ETV) are DataForSEO estimates; positions are organic ranks at collection time.</p>{% endif %}
+  <p>{{ dfs.ledger.requests }} requests, {{ dfs.ledger.failed }} failed, {{ dfs.ledger.skipped_budget }} skipped by the budget cap{% if dfs.reused_from %}; data reused from the collection at {{ dfs.reused_from }}{% endif %}. Location {{ dfs.location_code }}, language {{ dfs.language_code }}. Search volumes, difficulty and traffic (ETV) are DataForSEO estimates; positions are organic ranks at collection time.</p>{% endif %}
   <h3>Limits</h3>
   <ul>
     {% if not_judged %}<li>{{ not_judged | length }} pages were not judged by the model (request failed or budget cap reached); they carry no model findings, which is not the same as passing.</li>{% endif %}
