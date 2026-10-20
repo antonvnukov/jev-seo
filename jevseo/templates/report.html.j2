@@ -169,8 +169,8 @@
   <h2>Where the site ranks today</h2>
   <p class="lede">Google rankings, estimated traffic and links for {{ domain }} (location {{ dfs.location_code }}, language {{ dfs.language_code }}). Traffic is DataForSEO's estimate from rankings and search volumes, not measured visits.</p>
   <div class="tiles">
-    <div class="tile"><div class="v">{{ dfs.overview.count if dfs.overview.count is not none else 'n/a' }}</div><div class="l">keywords ranking in Google</div></div>
-    <div class="tile"><div class="v">{{ (dfs.overview.etv | round | int) if dfs.overview.etv is not none else 'n/a' }}</div><div class="l">estimated monthly visits (ETV)</div></div>
+    <div class="tile"><div class="v">{{ dfs.overview.count if dfs.overview.count is number else 'n/a' }}</div><div class="l">keywords ranking in Google</div></div>
+    <div class="tile"><div class="v">{{ (dfs.overview.etv | round | int) if dfs.overview.etv is number else 'n/a' }}</div><div class="l">estimated monthly visits (ETV)</div></div>
     <div class="tile"><div class="v">{{ dfs.backlinks.referring_domains if dfs.backlinks.referring_domains is not none else 'n/a' }}</div><div class="l">referring domains</div></div>
     <div class="tile"><div class="v">{{ dfs.backlinks.backlinks if dfs.backlinks.backlinks is not none else 'n/a' }}</div><div class="l">backlinks</div></div>
     <div class="tile jev"><div class="v">{{ dfs.mentions.total if dfs.mentions and dfs.mentions.total is not none else 'n/a' }}</div><div class="l">mentions in AI answers</div></div>
